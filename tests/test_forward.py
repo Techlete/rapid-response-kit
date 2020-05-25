@@ -1,4 +1,3 @@
-from nose.tools import assert_equal
 from rapid_response_kit.app import app
 from tests.base import KitTestCase
 
@@ -14,7 +13,7 @@ class ForwardTestCase(KitTestCase):
 
     def test_get(self):
         response = self.app.get('/forwarder')
-        assert_equal(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_post(self):
         self.app.post('/forwarder', data={'number': '4158675309',
@@ -22,8 +21,8 @@ class ForwardTestCase(KitTestCase):
 
         expected_url = 'http://twimlets.com/echo?Twiml=%3CResponse%3E%3CDial%3E%2B14158675309%3C%2FDial%3E%3C%2FResponse%3E'
 
-        self.patchio.phone_numbers.update.assert_called_with(
+        self.patchio.incoming_phone_numbers.update.assert_called_with(
             'PNSid',
             voice_url=expected_url,
-            friendly_name='[RRKit] Forwarder',
+            unique_name='[RRKit] Forwarder',
             voice_method='GET')

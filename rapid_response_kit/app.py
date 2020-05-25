@@ -38,9 +38,15 @@ def home():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--port', default=5000, action="store",
-                        help="The port to run the Twilio Toolkit on")
-    parser.add_argument('--debug', default=False, action="store_true",
-                        help="Turn on debug mode")
+    parser.add_argument(
+        '--port',
+        default=5000,
+        action="store",
+        help="The port to run the Twilio Toolkit on")
+    parser.add_argument(
+        '--debug',
+        default=False,
+        action="store_true",
+        help="Turn on debug mode")
     args = parser.parse_args()
     app.run(debug=args.debug, port=args.port)

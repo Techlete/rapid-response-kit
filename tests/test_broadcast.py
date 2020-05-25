@@ -1,5 +1,4 @@
 from mock import patch, Mock, call
-from nose.tools import assert_equal
 from rapid_response_kit.app import app
 from tests.base import KitTestCase
 
@@ -15,7 +14,7 @@ class BroadcastTestCase(KitTestCase):
 
     def test_get(self):
         response = self.app.get('/broadcast')
-        assert_equal(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_post_sms(self):
         self.app.post('/broadcast', data={'method': 'sms',
@@ -24,8 +23,8 @@ class BroadcastTestCase(KitTestCase):
                                           'message': 'Test Broadcast'})
 
         self.patchio.messages.create.assert_called_with(
+            '+14158675309',
             body='Test Broadcast',
-            to='+14158675309',
             from_='1415TWILIO',
             media_url=None
         )
@@ -38,14 +37,14 @@ class BroadcastTestCase(KitTestCase):
 
         self.patchio.messages.create.assert_has_calls([
             call(
+                '+14158675309',
                 body='Test Broadcast',
-                to='+14158675309',
                 from_='1415TWILIO',
                 media_url=None
             ),
             call(
+                '+14158675310',
                 body='Test Broadcast',
-                to='+14158675310',
                 from_='1415TWILIO',
                 media_url=None
             ),
@@ -61,8 +60,8 @@ class BroadcastTestCase(KitTestCase):
                                           'media': 'http://i.imgur.com/UMlp0iK.jpg'})
 
         self.patchio.messages.create.assert_called_with(
+            '+14158675309',
             body='Test Broadcast',
-            to='+14158675309',
             from_='1415TWILIO',
             media_url='http://i.imgur.com/UMlp0iK.jpg'
         )
@@ -76,14 +75,14 @@ class BroadcastTestCase(KitTestCase):
 
         self.patchio.messages.create.assert_has_calls([
             call(
+                '+14158675309',
                 body='Test Broadcast',
-                to='+14158675309',
                 from_='1415TWILIO',
                 media_url='http://i.imgur.com/UMlp0iK.jpg'
             ),
             call(
+                '+14158675310',
                 body='Test Broadcast',
-                to='+14158675310',
                 from_='1415TWILIO',
                 media_url='http://i.imgur.com/UMlp0iK.jpg'
             ),
@@ -96,9 +95,10 @@ class BroadcastTestCase(KitTestCase):
                                           'message': 'Test Broadcast'})
 
         self.patchio.calls.create.assert_called_with(
+            '+14158675309',
+            '1415TWILIO',
             url='http://twimlets.com/echo?Twiml=%3CResponse%3E%3CSay%3ETest+Broadcast%3C%2FSay%3E%3C%2FResponse%3E',
-            to='+14158675309',
-            from_='1415TWILIO')
+        )
 
     def test_post_call_multi(self):
         self.app.post('/broadcast', data={'method': 'voice',
@@ -108,14 +108,14 @@ class BroadcastTestCase(KitTestCase):
 
         self.patchio.calls.create.assert_has_calls([
             call(
+                '+14158675309',
+                '1415TWILIO',
                 url='http://twimlets.com/echo?Twiml=%3CResponse%3E%3CSay%3ETest+Broadcast%3C%2FSay%3E%3C%2FResponse%3E',
-                to='+14158675309',
-                from_='1415TWILIO'
             ),
             call(
+                '+14158675310',
+                '1415TWILIO',
                 url='http://twimlets.com/echo?Twiml=%3CResponse%3E%3CSay%3ETest+Broadcast%3C%2FSay%3E%3C%2FResponse%3E',
-                to='+14158675310',
-                from_='1415TWILIO'
             ),
         ])
 

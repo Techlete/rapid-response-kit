@@ -30,19 +30,19 @@ def install(app):
             try:
                 if request.form['method'] == 'sms':
                     client.messages.create(
-                        to=number,
+                        number,
                         from_=request.form.get('twilio_number', None),
                         body=request.form.get('message', ''),
                         media_url=media,
                     )
                 else:
                     client.calls.create(
-                        url=url,
-                        to=number,
-                        from_=request.form['twilio_number']
+                        number,
+                        request.form['twilio_number'],
+                        url=url
                     )
-                flash("Sent {} the message".format(number), 'success')
+                flash("Sent {number} the message", 'success')
             except Exception:
-                flash("Failed to send to {}".format(number), 'danger')
+                flash("Failed to send to {number}", 'danger')
 
         return redirect('/broadcast')

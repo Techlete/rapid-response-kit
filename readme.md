@@ -15,11 +15,13 @@ resolve and install dependencies.
 
 Please make sure that before you begin you meet the minimum requirements:
 
-- Python 2.7
+- Python 3.8 (advised, should work with 2.7)
 - virtualenv
 - pip
 
 ## Tools available out-of-the-box
+<details>
+<summary>(Expand)</summary>
 
 Twilio.org Rapid Response Kit comes with several tools already installed. When you
 start up the Twilio.org Rapid Response Kit it will report what tools are available
@@ -58,8 +60,8 @@ Useful for setting up simple phone menus a la "Press 1 to call the Site Manager,
 Press 2 to hear shelter hours, etc"
 
 ### Survey
-**Survey requires integration with Parse to record results**.
 
+**Survey requires integration with Parse to record results**.
 An SMS-powered survey app to send out questions to a specified list of numbers and gather responses. You define the response parameters. Survey is similar to Broadcast but instead of broadcasting an informational
 message, it broadcasts a yes / no question. Responses will be recorded in Parse
 for analysis and action.
@@ -67,7 +69,37 @@ for analysis and action.
 Useful for quick status and safety checks. Ex: "Can you help at 12th Street
 Response Center?"
 
-#### Getting Firebase Url and Secret Key
+### Town Hall
+With this group conference call tool, an organizer can dial one number which then dials a list of predefined contacts. Individuals who answer the call are dropped into the same conference. This can handle up to 40 people in one conference call.
+
+Useful for quickly gathering key stakeholders together for conference calls
+without requiring everyone to dial into a predefined number.
+
+### Volunteer Signup
+
+**Volunteer Signup requires Google credentials to record results.**
+Broadcast an sms message to a group of numbers with a volunteer opportunity and record responses to a Google spreadsheet.
+
+Useful for quickly signing up volunteers and easily determining who is available to show up.
+
+Note : If your Google account has 2-factor authentication enabled, you may need to [generate an application specific password](https://support.google.com/accounts/answer/185833?hl=en).
+
+### Noticeboard
+
+**Noticeboard requires Pusher credentials for realtime updates**
+Noticeboard is a virtual noticeboard where people can send MMS pictures of missing people, damaged items, or useful information to a publicly accessible webpage that will update in realtime as it receives MMS messages, allowing people in disaster relief to share information.
+
+This tool was developed using the brand new MMS messaging capabilities at Twilio.
+
+Noticeboard is a perfect tool to have running in disaster relief centers where people might congregate.
+
+</details>
+
+## Setup
+<details>
+<summary>(Expand)</summary>
+
+### Getting Firebase Url and Secret Key
 
 * [Create a free Firebase project here](https://firebase.google.com/)
 
@@ -92,26 +124,13 @@ FIREBASE_URL = 'Firebase Url'
 FIREBASE_SECRET = 'Firebase Secret Key'
 ```
 
+### Getting Google account credentials
 
-### Town Hall
-With this group conference call tool, an organizer can dial one number which then dials a list of predefined contacts. Individuals who answer the call are dropped into the same conference. This can handle up to 40 people in one conference call.
-
-Useful for quickly gathering key stakeholders together for conference calls
-without requiring everyone to dial into a predefined number.
-
-### Volunteer Signup
-**Volunteer Signup requires Google credentials to record results.**
-Broadcast an sms message to a group of numbers with a volunteer opportunity and record responses to a Google spreadsheet.
-
-Useful for quickly signing up volunteers and easily determining who is available to show up.
-
-Note : If your Google account has 2-factor authentication enabled, you may need to [generate an application specific password](https://support.google.com/accounts/answer/185833?hl=en).
-
-#### Gettin Google account credentials
+#### For email
 
 * If you're **not** using 2-factor auth, just use your username and password. Be careful not to share them!
 
-* If you are using 2-factor authenthication, [visit the app passwords page here](https://security.google.com/settings/security/apppasswords)
+* If you are using 2-factor authentication, [visit the app passwords page here](https://security.google.com/settings/security/apppasswords)
 
 * After signing in, choose "custom app" from the "select app" dropdown menu:
 
@@ -128,16 +147,27 @@ GOOGLE_ACCOUNT_USER = 'email'
 GOOGLE_ACCOUNT_PASS = 'password'
 ```
 
-### Noticeboard
+#### For Sheets & Drive
 
-**Noticeboard requires Pusher credentials for realtime updates**
-Noticeboard is a virtual noticeboard where people can send MMS pictures of missing people, damaged items, or useful information to a publicly accessible webpage that will update in realtime as it receives MMS messages, allowing people in disaster relief to share information.
+For writing to Google Sheets, we've now bundled the gspread library along with oauth2client.
 
-This tool was developed using the brand new MMS messaging capabilities at Twilio.
+To use these you'll need an OAuth2 service account. This will walk you through that.
 
-Noticeboard is a perfect tool to have running in disaster relief centers where people might congregate.
+You'll need a Google account. A Free one should do, but a g-suite is more ideal.
 
-#### Getting Pusher keys
+1. Go to the [Google APIs Console](https://console.developers.google.com/apis/dashboard).
+2. Create a *new project*.
+3. Click **Enable API**.
+4. Search for and enable the Google Drive API, and Google Sheets API.
+4. **Create credentials** for a *Web Server* to access *Application Data*.
+5. Name the service account, grant it a **Project** *Role* of **Editor**.
+6. Download the JSON file.
+7. Remove all visible newlines (but not escaped `\n` newlines)
+8. Save the file with linefeed `LF` only endings, not carriage-return + linefeed `CFLF`
+
+This JSON will form the `GOOGLE_API_SERVICES_JSON` Environment variable for Heroku deploys
+
+### Getting Pusher keys
 
 * [Sign up for a free account as pusher.com](https://pusher.com/signup)
 
@@ -153,7 +183,10 @@ Noticeboard is a perfect tool to have running in disaster relief centers where p
 PUSHER_APP_ID='app_id'
 PUSHER_KEY='key'
 PUSHER_SECRET='secret'
+PUSHER_CLUSTER='the cluster you select'
 ```
+
+</details>
 
 ## Installation
 
@@ -218,13 +251,14 @@ Click the button below to automatically set up the Rapid Response Kit in an app 
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
-Alternatively, you can manually create a Heroku app and use Git to push and deploy.
+For power-users, you can manually create a Heroku app and use Git to push and deploy. Please use app.json provided as a guide
 
 ## Meta
+
 No warranty expressed or implied. Software is as is.
 MIT License
 Powered by Twilio.org
+Fixed and updated by Techlete Ltd
 
 
-The Twilio.org Rapid Response Kit is just a flask app, so feel free to deploy as you
-would any flask application.
+The Twilio.org Rapid Response Kit is a flask app. If you are familiar with deploying those, you may have other ideas for deployment. We've tried to keep the not invented here to a minimum, so hopefully you can. If not, raise an issue please.

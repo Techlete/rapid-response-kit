@@ -3,10 +3,10 @@
   "description": "The Twilio-powered Rapid Response Kit gives you the elements to build and deploy communications apps quickly and easily.",
   "logo": "https://www.twilio.com/bundles/marketing/img/logos/wordmark-red.svg",
   "repository": "https://github.com/Twilio-org/rapid-response-kit",
-  "keywords": ["twilio", "python", "flask"],
+  "keywords": ["twilio", "python", "flask", "telephony", "sms", "phone", ""],
   "env": {
-	"SECRET_KEY": {
-	  "description": "A secret key for verifying the integrity of signed cookies.",
+	  "SECRET_KEY": {
+	    "description": "A secret key for verifying the integrity of signed cookies.",
       "generator": "secret"
     },
     "TWILIO_ACCOUNT_SID": {
@@ -15,6 +15,42 @@
     },
     "TWILIO_AUTH_TOKEN": {
       "description": "Your Twilio authentication token",
+      "required": true
+    },
+    "GOOGLE_ACCOUNT_USER": {
+      "description": "Your Gmail Email",
+      "required": true
+    },
+    "GOOGLE_ACCOUNT_PASS": {
+      "description": "Your Gmail App password",
+      "required": true
+    },
+    "GOOGLE_API_SERVICES_JSON": {
+      "description": "The Google API Console Oauth Service Account JSON with all literal line-feeds removed in LF single-quoted",
+      "required": true
+    },
+    "FIREBASE_URL": {
+      "description": "Your Twilio authentication token",
+      "required": true
+    },
+    "FIREBASE_SECRET": {
+      "description": "Your Twilio authentication token",
+      "required": true
+    },
+    "PUSHER_APP_ID": {
+	    "description": "Your Pusher App id",
+      "required": true
+    },
+    "PUSHER_SECRET": {
+      "description": "Your Pusher Secret",
+      "required": true
+    },
+    "PUSHER_CLUSTER": {
+	    "description": "Your Pusher Cluster",
+      "required": true
+    },
+    "PUSHER_KEY": {
+      "description": "Your Pusher Key",
       "required": true
     }
   }

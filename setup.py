@@ -5,7 +5,7 @@
 from setuptools import setup, find_packages
 
 setup(name='rapid_response_kit',
-      version='1.0.0',
+      version='1.0.1',
       author='Twilio',
       author_email='help@twilio.com',
       description='Twilio Rapid Response Kit',

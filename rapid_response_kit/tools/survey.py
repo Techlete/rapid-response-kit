@@ -1,23 +1,25 @@
+# -*- coding: future_fstrings -*-
 import uuid
 import requests
 
 from rapid_response_kit.utils.clients import twilio
-from clint.textui import colored
 from flask import render_template, request, flash, redirect
 from rapid_response_kit.utils.helpers import twilio_numbers, parse_numbers
-from twilio.twiml import Response
+from twilio.twiml.messaging_response import MessagingResponse
 
 
 def install(app):
-    if 'FIREBASE_URL' not in app.config or \
-       'FIREBASE_SECRET' not in app.config:
-        print(colored.red(
-                    '''
-                    Survey requires Firebase.
-                    Please add FIREBASE_URL and FIREBASE_SECRET
-                    to rapid_response_kit/utils/config.py
-                    '''))
-        return
+    if any([
+        'FIREBASE_URL' not in app.config,
+        'FIREBASE_SECRET' not in app.config,
+    ]):
+        print(
+            '''
+            Survey requires Firebase.
+            Please add FIREBASE_URL and FIREBASE_SECRET
+            to rapid_response_kit/utils/config.py
+            ''')
+        exit(-2)
 
     app.config.apps.register('survey', 'Survey', '/survey')
 
@@ -35,11 +37,11 @@ def install(app):
         sms_url = "{}/handle?survey={}".format(request.base_url, survey)
 
         try:
-            twilio_client.phone_numbers.update(
+            twilio_client.incoming_phone_numbers.update(
                 twilio_number,
                 sms_url=sms_url,
                 sms_method='GET',
-                friendly_name='[RRKit] Survey'
+                unique_name='[RRKit] Survey'
             )
         except:
             flash('Unable to update number', 'danger')
@@ -48,16 +50,15 @@ def install(app):
         flash('Survey is now running as {}'.format(survey), 'info')
 
         kwargs = {}
-        kwargs['body'] = "{} Reply YES / NO".format(request.form['question'])
-        kwargs['from_'] = twilio_client.phone_numbers.get(twilio_number).phone_number
+        kwargs['body'] = f"{request.form['question']} Reply YES / NO"
+        kwargs['from_'] = twilio_number
         kwargs['media'] = request.form.get('media', None)
-        if request.form.get('media', None):
+        if not kwargs['media']:
             kwargs.pop('media')
 
         for number in numbers:
-            kwargs['to'] = number
             try:
-                twilio_client.messages.create(**kwargs)
+                twilio_client.messages.create(number, **kwargs)
                 flash('Sent {} the survey'.format(number), 'success')
             except Exception:
                 flash("Failed to send to {}".format(number), 'danger')
@@ -78,7 +79,7 @@ def install(app):
 
         result = requests.get(json_url, params={'auth': app.config['FIREBASE_SECRET']}).json()
         if result:
-            resp = Response()
+            resp = MessagingResponse()
             resp.sms('Your response has been recorded')
             return str(resp)
 
@@ -90,6 +91,6 @@ def install(app):
             'survey_id': request.args['survey']
         })
 
-        resp = Response()
+        resp = MessagingResponse()
         resp.sms('Thanks for answering our survey')
         return str(resp)

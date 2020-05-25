@@ -1,3 +1,4 @@
+# -*- coding: future_fstrings -*-
 from rapid_response_kit.utils.clients import twilio
 from flask import render_template, request, redirect, flash
 from rapid_response_kit.utils.helpers import (
@@ -5,7 +6,7 @@ from rapid_response_kit.utils.helpers import (
     twilio_numbers,
     check_is_valid_url
 )
-from twilio.twiml import Response
+from twilio.twiml.messaging_response import MessagingResponse
 
 
 def install(app):
@@ -29,26 +30,27 @@ def install(app):
         voice_url = ''
 
         if len(sms_message) > 0:
-            r = Response()
+            r = MessagingResponse()
             mms_media = check_is_valid_url(request.form.get('media', ''))
             if mms_media:
                 r.message(sms_message).media(mms_media)
             else:
                 r.message(sms_message)
-            sms_url = echo_twimlet(r.toxml())
+            sms_url = echo_twimlet(r.to_xml())
 
         if len(voice_message) > 0:
-            twiml = '<Response><Say>{}</Say></Response>'.format(voice_message)
+            twiml = f"<Response><Say>{voice_message}</Say></Response>"
             voice_url = echo_twimlet(twiml)
 
         try:
             client = twilio()
-            client.phone_numbers.update(request.form['twilio_number'],
-                                        friendly_name='[RRKit] Auto-Respond',
-                                        voice_url=voice_url,
-                                        voice_method='GET',
-                                        sms_url=sms_url,
-                                        sms_method='GET')
+            client.incoming_phone_numbers.update(
+                request.form['twilio_number'],
+                unique_name='[RRKit] Auto-Respond',
+                voice_url=voice_url,
+                voice_method='GET',
+                sms_url=sms_url,
+                sms_method='GET')
 
             flash('Auto-Respond has been configured', 'success')
         except Exception:

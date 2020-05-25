@@ -9,7 +9,7 @@ from rapid_response_kit.utils.helpers import (
     twilio_numbers
 )
 
-from twilio.twiml import Response
+from twilio.twiml.voice_response  import VoiceResponse
 
 
 def install(app):
@@ -30,18 +30,19 @@ def install(app):
 
         url = "{}/handle?{}".format(request.base_url, urlencode(data, True))
 
-        r = Response()
+        r = VoiceResponse()
         r.say('System is down for maintenance')
-        fallback_url = echo_twimlet(r.toxml())
+        fallback_url = echo_twimlet(r.to_xml())
 
         try:
             client = twilio()
-            client.phone_numbers.update(request.form['twilio_number'],
-                                        friendly_name='[RRKit] Ringdown',
-                                        voice_url=url,
-                                        voice_method='GET',
-                                        voice_fallback_url=fallback_url,
-                                        voice_fallback_method='GET')
+            client.incoming_phone_numbers.update(
+                str(request.form.get('twilio_number')),
+                unique_name='[RRKit] Ringdown',
+                voice_url=url,
+                voice_method='GET',
+                voice_fallback_url=fallback_url,
+                voice_fallback_method='GET')
 
             flash('Number configured', 'success')
         except Exception:
@@ -56,7 +57,7 @@ def install(app):
 
         if len(stack) == 0:
             # Nothing else to ringdown
-            resp = Response()
+            resp = VoiceResponse()
             resp.say(sorry)
 
             return str(resp)
@@ -70,7 +71,7 @@ def install(app):
 
         qs = urlencode(data, True)
 
-        resp = Response()
+        resp = VoiceResponse()
         resp.dial(top, timeout=10, action="/ringdown/handle?{}".format(qs),
                   method='GET')
 

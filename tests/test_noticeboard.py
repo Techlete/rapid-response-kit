@@ -1,5 +1,4 @@
-from mock import call
-from nose.tools import assert_equal
+from mock import call, ANY
 from rapid_response_kit.app import app
 from tests.base import KitTestCase
 
@@ -20,9 +19,9 @@ class NoticeboardTestCase(KitTestCase):
                                           'message': 'Test Noticeboard'})
 
 
-        self.patchio.messages.create.assert_called(
+        self.patchio.messages.create.assert_called_with(
+            '+14158675309',
             body='Test Noticeboard',
-            to='+14158675309',
             from_='1415TWILIO',
             media_url=None
         )
@@ -34,9 +33,9 @@ class NoticeboardTestCase(KitTestCase):
                                           'message': 'Test Noticeboard',
                                           'media': 'http://i.imgur.com/UMlp0iK.jpg'})
 
-        self.patchio.messages.create.assert_called(
+        self.patchio.messages.create.assert_called_with(
+            '+14158675309',
             body='Test Noticeboard',
-            to='+14158675309',
             from_='1415TWILIO',
             media_url='http://i.imgur.com/UMlp0iK.jpg'
         )

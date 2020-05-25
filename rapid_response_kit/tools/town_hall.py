@@ -27,9 +27,9 @@ def install(app):
         for number in numbers:
             try:
                 client.calls.create(
+                    number,
+                    request.form['twilio_number'],
                     url=url,
-                    to=number,
-                    from_=request.form['twilio_number']
                 )
                 flash(
                     '{} contacted to join {}'.format(number, room), 'success')

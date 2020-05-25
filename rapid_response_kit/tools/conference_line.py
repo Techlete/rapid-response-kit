@@ -9,7 +9,7 @@ from rapid_response_kit.utils.helpers import (
 
 from flask import render_template, request, redirect, flash
 
-from twilio.twiml import Response
+from twilio.twiml.voice_response  import VoiceResponse
 
 
 def install(app):
@@ -39,9 +39,9 @@ def install(app):
 
         try:
             client = twilio()
-            client.phone_numbers.update(
+            client.incoming_phone_numbers.update(
                 request.form['twilio_number'],
-                friendly_name='[RRKit] Conference Line',
+                unique_name='[RRKit] Conference Line',
                 voice_url=url,
                 voice_method='GET',
                 fallback_voice_url=fallback(),
@@ -60,20 +60,20 @@ def install(app):
 
         if len(whitelist) > 0:
             if request.args['From'] not in whitelist:
-                resp = Response()
+                resp = VoiceResponse()
                 resp.say('Sorry, you are not authorized to call this number')
                 return str(resp)
 
         room = request.args.get('room', False)
 
         if room:
-            resp = Response()
+            resp = VoiceResponse()
             with resp.dial() as d:
                 d.conference(room)
             return str(resp)
 
         # Gather the room code
-        resp = Response()
+        resp = VoiceResponse()
         with resp.gather(numDigits=3, action='/conference-line/connect',
                          method='GET') as g:
             g.say("Enter a 3-digit room code")
@@ -82,7 +82,7 @@ def install(app):
 
     @app.route('/conference-line/connect')
     def connect_conference_line():
-        resp = Response()
+        resp = VoiceResponse()
         with resp.dial() as d:
             d.conference(request.args['Digits'])
         return str(resp)

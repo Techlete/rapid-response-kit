@@ -1,5 +1,4 @@
 from mock import call
-from nose.tools import assert_equal
 from rapid_response_kit.app import app
 from tests.base import KitTestCase
 
@@ -15,7 +14,7 @@ class TownHallTestCase(KitTestCase):
 
     def test_get(self):
         response = self.app.get('/town-hall')
-        assert_equal(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_post(self):
         self.app.post('/town-hall', data={'numbers': '4158675309\n4158675310',
@@ -25,14 +24,14 @@ class TownHallTestCase(KitTestCase):
 
         self.patchio.calls.create.assert_has_calls([
             call(
+                '+14158675309',
+                '1415TWILIO',
                 url=join_url,
-                to='+14158675309',
-                from_='1415TWILIO'
             ),
             call(
+                '+14158675310',
+                '1415TWILIO',
                 url=join_url,
-                to='+14158675310',
-                from_='1415TWILIO'
             )
         ])
 

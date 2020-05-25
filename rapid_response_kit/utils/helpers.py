@@ -56,13 +56,13 @@ def fallback(message='Sorry the service is down for maintenance'):
 def twilio_numbers(id_field='sid'):
     client = twilio()
 
-    numbers = client.phone_numbers.list()
+    numbers = client.incoming_phone_numbers.list()
 
     result = []
     for number in numbers:
-        if number.friendly_name.startswith('[RRKit]'):
+        if number.unique_name.startswith('[RRKit]'):
             display_name = '[{}] {}'.format(
-                number.friendly_name[len('[RRKit]') + 1:],
+                number.unique_name[len('[RRKit]') + 1:],
                 number.phone_number
             )
         else:

@@ -29,8 +29,8 @@ def install(app):
 
         try:
             client = twilio()
-            client.phone_numbers.update(request.form['twilio_number'],
-                                        friendly_name='[RRKit] Forwarder',
+            client.incoming_phone_numbers.update(request.form['twilio_number'],
+                                        unique_name='[RRKit] Forwarder',
                                         voice_url=url,
                                         voice_method='GET')
 

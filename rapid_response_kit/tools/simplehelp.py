@@ -3,14 +3,14 @@ from rapid_response_kit.utils.compat import urlencode
 from rapid_response_kit.utils.clients import twilio
 from flask import render_template, request, redirect, flash
 from rapid_response_kit.utils.helpers import echo_twimlet
-from twilio.twiml import Response
+from twilio.twiml.voice_response  import VoiceResponse
 from rapid_response_kit.utils.helpers import twilio_numbers
 
 
 keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#']
 start_menu = "Thank you for calling {}."
 opt_say = "{}, press {}."
-err_say = "Sorry, that's not a valid choice."
+err_say = "Sorry, that is not a valid choice."
 end_say = "Thank you for calling, goodbye."
 voice = 'alice'
 
@@ -29,15 +29,15 @@ def install(app):
         data = parse_form(request.form)
         url = "{}/handle?{}".format(request.base_url, urlencode(data, True))
 
-        r = Response()
+        r = VoiceResponse()
         r.say('System is down for maintenance')
-        fallback_url = echo_twimlet(r.toxml())
+        fallback_url = echo_twimlet(r.to_xml())
 
         try:
             client = twilio()
-            client.phone_numbers.update(
+            client.incoming_phone_numbers.update(
                 request.form['twilio_number'],
-                friendly_name='[RRKit] Simple Help Line',
+                unique_name='[RRKit] Simple Help Line',
                 voice_url=url,
                 voice_method='GET',
                 voice_fallback_url=fallback_url,
@@ -56,7 +56,7 @@ def install(app):
 
         url = "{}?{}".format(request.base_url, request.query_string)
 
-        response = Response()
+        response = VoiceResponse()
         response.say(start_menu.format(request.args.get('name')), voice=voice)
         gather = response.gather(numDigits=1, action=url, method='POST')
 
@@ -73,7 +73,7 @@ def install(app):
 
     @app.route('/simplehelp/handle', methods=['POST'])
     def handle_opt():
-        response = Response()
+        response = VoiceResponse()
 
         digit = request.form['Digits']
         opt = request.args.get('opt_' + digit, None)

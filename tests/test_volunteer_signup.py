@@ -1,5 +1,4 @@
-from mock import call
-from nose.tools import assert_equal
+from mock import call, ANY
 from rapid_response_kit.app import app
 from tests.base import KitTestCase
 
@@ -25,8 +24,8 @@ class VolunteerSignupTestCase(KitTestCase):
                                           'twilio_number': 'PNSid',
                                           'message': 'Test Volunteer Signup'})
 
-        self.patchio.messages.create.assert_called(
-            to='+14158675309'
+        self.patchio.messages.create.assert_called_with(
+            '+14158675309', body=ANY, from_=ANY, media_url=None
         )
 
     def test_post_number_update(self):
@@ -35,20 +34,21 @@ class VolunteerSignupTestCase(KitTestCase):
         expected_voice_url = 'http://localhost/volunteer-signup/handle?'
         expected_fallback_url = 'http://twimlets.com/echo?Twiml=%3CResponse%3E%3CSay%3ESystem+is+down+for+maintenance%3C%2FSay%3E%3C%2FResponse%3E'
 
-        self.patchio.phone_numbers.update.assert_called(
+        self.patchio.incoming_phone_numbers.update.assert_called_with(
             'PNSid',
+            unique_name='[RRKit] Volunteer Signup',
             sms_url=expected_voice_url,
             sms_fallback_method='GET',
-            friendly_name='[RRKit] Volunteer Signup',
             sms_method='POST',
-            sms_fallback_url=expected_fallback_url)
+            sms_fallback_url=expected_fallback_url
+        )
 
 
     def test_handle(self):
         self.app.post('/volunteer-signup/handle', data={
-                                          'From': '4158675309',
+                                          'From': '+14158675309',
                                           'Body': 'Reply to volunteer'})
 
-        self.patchio.messages.create.assert_called(
-            to='+14158675309'
+        self.patchio.messages.create.assert_called_with(
+            '+14158675309', body=ANY, from_=ANY
         )

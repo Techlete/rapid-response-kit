@@ -1,3 +1,4 @@
+# -*- coding: future_fstrings -*-
 from rapid_response_kit.utils.clients import twilio, pusher_connect
 from rapid_response_kit.utils.helpers import (
     parse_numbers,
@@ -6,8 +7,7 @@ from rapid_response_kit.utils.helpers import (
     check_is_valid_url
 )
 
-from clint.textui import colored
-from twilio.twiml import Response
+from twilio.twiml.messaging_response import MessagingResponse
 from pusher import Pusher
 from flask import render_template, request, flash, redirect
 
@@ -16,12 +16,11 @@ def install(app):
     if pusher_connect(app.config):
         app.config.apps.register('noticeboard', 'Noticeboard', '/noticeboard')
     else:
-        print(colored.red(
-                    '''
-                    Noticeboard requires Pusher credentials.
-                    Please add PUSHER_APP_ID, PUSHER_KEY and PUSHER_SECRET
-                    to rapid_response_kit/utils/config.py'''))
-        return
+        print('''
+        Noticeboard requires Pusher credentials.
+        Please add PUSHER_APP_ID, PUSHER_KEY and PUSHER_SECRET
+        to rapid_response_kit/utils/config.py''')
+        exit(-2)
 
     @app.route('/noticeboard', methods=['GET'])
     def show_noticeboard():
@@ -30,13 +29,13 @@ def install(app):
 
         # Build a list of numbers that are being used for Noticeboard
         noticeboard_numbers = []
-        for p in client.phone_numbers.list():
-            if '[RRKit] Noticeboard' in p.friendly_name:
+        for p in client.incoming_phone_numbers.list():
+            if '[RRKit] Noticeboard' in p.unique_name:
                 noticeboard_numbers.append(p.phone_number)
 
         return render_template(
             "noticeboard.html",
-            url='{0}/live'.format(request.base_url),
+            url=f'{request.base_url}/live',
             numbers=numbers,
             noticeboards=noticeboard_numbers
         )
@@ -45,30 +44,26 @@ def install(app):
     def do_noticeboard():
         client = twilio()
 
-        url = "{0}noticeboard/post".format(request.url_root)
-        client.phone_numbers.update(request.form['twilio_number'],
+        url = f"{request.url_root}noticeboard/post"
+        client.incoming_phone_numbers.update(request.form['twilio_number'],
                                     sms_url=url,
                                     sms_method='POST',
-                                    friendly_name='[RRKit] Noticeboard')
+                                    unique_name='[RRKit] Noticeboard')
 
-        from_number = client.phone_numbers.get(request.form['twilio_number'])
-
-        live_url = '{0}noticeboard/live/{1}'.format(
-            request.url_root,
-            from_number.phone_number
-        )
+        from_number = request.form['twilio_number']
+        live_url = f'{request.url_root}noticeboard/live/{from_number}'
         numbers = parse_numbers(request.form['numbers'])
         body = request.form.get('message', '').replace('{URL}', live_url)
         media = check_is_valid_url(request.form.get('media', ''))
 
         for num in numbers:
             client.messages.create(
-                to=num,
-                from_=from_number.phone_number,
+                num,
+                from_=from_number,
                 body=body,
                 media_url=media
             )
-            flash('Sent {0} the message'.format(num), 'success')
+            flash(f'Sent {num} the message', 'success')
 
 
         return redirect('/noticeboard')
@@ -95,11 +90,11 @@ def install(app):
             return '<Response />'
 
         to = request.values.get('To', '')
-        r = Response()
+        r = MessagingResponse()
         r.message(
-            '''Thank you, your image has been posted
-            to {0}noticeboard/live/{1}'''.format(request.url_root, to))
-        return r.toxml()
+            f'''Thank you, your image has been posted
+            to {request.url_root}noticeboard/live/{to}''')
+        return r.to_xml()
 
     @app.route('/noticeboard/live/<number>', methods=['GET'])
     def show_noticeboard_live(number=None):
@@ -113,7 +108,7 @@ def install(app):
 
         # Build a list of messages to our number that has media attached
         msgs = []
-        for m in twilio_client.messages.list(to=cleaned_number):
+        for m in twilio_client.messages.list(cleaned_number):
             if int(m.num_media) > 0:
                 msgs.append(m)
 

@@ -28,7 +28,7 @@
                     </div>
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav">
-                    {% for id, app in config.apps.registry.iteritems() %}
+                    {% for idx, app in config.apps.registry.items() %}
                         <li>
                             <a href="{{ app.link }}">{{ app.name }}</a>
                         </li>
